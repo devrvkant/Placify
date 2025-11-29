@@ -37,7 +37,6 @@
 @import "@fontsource/jetbrains-mono/600.css";
 @import "@fontsource/jetbrains-mono/700.css";
 @import "@fontsource/jetbrains-mono/800.css";
-@import "@fontsource/jetbrains-mono/900.css";
 @import "@fontsource/jetbrains-mono/100-italic.css";
 @import "@fontsource/jetbrains-mono/200-italic.css";
 @import "@fontsource/jetbrains-mono/300-italic.css";
@@ -46,7 +45,6 @@
 @import "@fontsource/jetbrains-mono/600-italic.css";
 @import "@fontsource/jetbrains-mono/700-italic.css";
 @import "@fontsource/jetbrains-mono/800-italic.css";
-@import "@fontsource/jetbrains-mono/900-italic.css";
 
 @custom-variant dark (&:is(.dark *));
 
