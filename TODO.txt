@@ -1,0 +1,10 @@
+---> For Landing Page
+1. logo change and nav-links change on landing page
+2. some ui enhancements on landing page
+3. implment talk to partner in CTABanner on landing page
+
+---> For Email Templates
+1. put app logo through CDN
+
+---> For Auth Pages
+1. implment login with google functionality

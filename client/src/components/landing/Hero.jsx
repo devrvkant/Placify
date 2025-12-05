@@ -39,10 +39,10 @@ const Hero = () => {
 
                         <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
                             <Button size="lg" className="w-full sm:w-auto px-8 h-12 text-base" asChild>
-                                <Link to="/student">Get Started as Student</Link>
+                                <Link to="/auth/register/student">Get Started as Student</Link>
                             </Button>
                             <Button variant="outline" size="lg" className="w-full sm:w-auto px-8 h-12 text-base" asChild>
-                                <Link to="/recruiter">Post a Role as Recruiter</Link>
+                                <Link to="/auth/register/recruiter">Post a Role as Recruiter</Link>
                             </Button>
                         </div>
 
