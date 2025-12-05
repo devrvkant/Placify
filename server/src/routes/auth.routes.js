@@ -6,8 +6,9 @@ import { auth } from "../middlewares/auth.middleware.js";
 const authRouter = Router();
 
 // Public Routes (No Auth Required)
-// 1. Create a new user (student or recruiter)
-authRouter.post("/register", registerUser);
+// 1. Create a new user (student and recruiter)
+authRouter.post("/register/student", registerStudent);
+authRouter.post("/register/recruiter", registerRecruiter);
 
 // 2. Verify email address
 authRouter.get("/verify-email", verifyEmailToken);

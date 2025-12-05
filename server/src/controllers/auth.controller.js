@@ -21,17 +21,15 @@ const getIsProfileComplete = (user) => {
   return true; // admins
 };
 
-// @desc    Register new user (student or recruiter) – NO auto login
-// @route   POST /api/auth/register
-// @access  Public
-export const registerUser = async (req, res) => {
+/**
+ * Internal helper – actual registration logic.
+ * role is passed from controller (student | recruiter), NOT from client.
+ */
+export const registerUserWithRole = async (req, res, role) => {
   try {
-    const { fullName, email, password, role } = req.body;
-    if (!fullName || !email || !password || !role) {
+    const { fullName, email, password } = req.body;
+    if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All fields are required!" });
-    }
-    if (!["student", "recruiter"].includes(role)) {
-      return res.status(400).json({ message: "Invalid role!" });
     }
 
     // check if user with this email already exists
@@ -80,8 +78,24 @@ export const registerUser = async (req, res) => {
     });
   } catch (err) {
     console.error("Error in registering user: ", err.message);
-    return res.status(500).json({ message: "Internal Server Error, Please try again later!" });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error, Please try again later!" });
   }
+};
+
+// @desc Register STUDENT – no auto login
+// @route POST /api/auth/register/student
+// @access Public
+export const registerStudent = (req, res) => {
+  return registerUserWithRole(req, res, "student");
+};
+
+// @desc Register RECRUITER – no auto login
+// @route POST /api/auth/register/recruiter
+// @access Public
+export const registerRecruiter = (req, res) => {
+  return registerUserWithRole(req, res, "recruiter");
 };
 
 // @desc    Verify email using token sent to user
@@ -121,7 +135,9 @@ export const verifyEmailToken = async (req, res) => {
       .json({ message: "Email verified successfully. You can log in now." });
   } catch (err) {
     console.error("Error in verifying email: ", err.message);
-    return res.status(500).json({ message: "Internal Server Error, Please try again later!" });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error, Please try again later!" });
   }
 };
 
@@ -171,7 +187,9 @@ export const loginUser = async (req, res) => {
     });
   } catch (err) {
     console.error("Error in logging in: ", err.message);
-    return res.status(500).json({ message: "Internal Server Error, Please try again later!" });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error, Please try again later!" });
   }
 };
 
@@ -203,6 +221,8 @@ export const getCurrentUser = async (req, res) => {
     });
   } catch (err) {
     console.error("Error in getting current user: ", err.message);
-    return res.status(500).json({ message: "Internal Server Error, Please try again later!" });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error, Please try again later!" });
   }
 };
