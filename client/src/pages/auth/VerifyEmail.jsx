@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import config from "../config/env";
+import config from "../../config/env";
 
 export default function VerifyEmail() {
   const [status, setStatus] = useState("loading");
