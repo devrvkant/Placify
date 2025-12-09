@@ -8,6 +8,3 @@
 
 ---> For Auth Pages
 1. implment login with google functionality
-
----> For RequireAuth comp
-1. implement the loadingStatus based on your ui/ux prefrences when auth(/me) is in loading

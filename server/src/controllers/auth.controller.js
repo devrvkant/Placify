@@ -178,11 +178,11 @@ export const loginUser = async (req, res) => {
     const userObj = user.toObject();
 
     const isProfileComplete = getIsProfileComplete(user);
+    userObj.isProfileComplete = isProfileComplete;
 
     return res.json({
       message: "Login successful.",
       user: userObj,
-      isProfileComplete,
       // no JWT in body on purpose, only in httpOnly cookie
     });
   } catch (err) {
@@ -219,10 +219,10 @@ export const getCurrentUser = async (req, res) => {
     delete userObj.passwordHash;
 
     const isProfileComplete = getIsProfileComplete(req.user);
+    userObj.isProfileComplete = isProfileComplete;
 
     return res.json({
       user: userObj,
-      isProfileComplete,
     });
   } catch (err) {
     console.error("Error in getting current user: ", err.message);

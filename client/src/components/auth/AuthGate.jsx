@@ -1,31 +1,38 @@
-// import { useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import { useGetMeQuery } from "../../features/auth/authApi";
+import { clearCredentials, hydrateUserFromStorage, selectIsHydrated, setCredentials, setHydrated } from "../../features/auth/authSlice";
 
 export function AuthGate({ children }) {
-  // const dispatch = useDispatch();
-  // const authStatus = useSelector((state) => state.auth.status);
+  const dispatch = useDispatch();
+  const hydrated = useSelector(selectIsHydrated);
 
-  // const [hydrated, setHydrated] = useState(false);
+  // Hydrate Redux from localStorage (instant UI)
+  useEffect(() => {
+    dispatch(hydrateUserFromStorage());
+    dispatch(setHydrated(true));
+  }, [dispatch]);
 
-  // 1️⃣ Hydrate from localStorage first
-  // useEffect(() => {
-  //   dispatch(hydrateUserFromStorage());
-  //   setHydrated(true);
-  // }, [dispatch]);
+  // Silent /auth/me in background AFTER hydration
+  const { data, isError } = useGetMeQuery(undefined, {
+    skip: !hydrated, // don't fire until we've hydrated
+  });
 
-  // 2️⃣ Call /auth/me only AFTER hydration
-  const { isLoading } = useGetMeQuery();
+  useEffect(() => {
+    if (!hydrated) return;
 
+    if (data) {
+      // If your /auth/me returns { user: {...} } adjust accordingly
+      const user = data.user || data;
+      dispatch(setCredentials(user));
+      localStorage.setItem("user", JSON.stringify(user));
+    } else if (isError) {
+      dispatch(clearCredentials());
+      localStorage.removeItem("user");
+    }
+  }, [hydrated, data, isError, dispatch]);
 
-  // 3️⃣ Block UI until auth is resolved
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">Loading Placify...</p>
-      </div>
-    );
-  }
-
+  // ️Always render children – no blocking loader
   return children;
 }
