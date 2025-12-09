@@ -2,11 +2,12 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { useGetMeQuery } from "../../features/auth/authApi";
-import { clearCredentials, hydrateUserFromStorage, selectIsHydrated, setCredentials, setHydrated } from "../../features/auth/authSlice";
+import { clearCredentials, hydrateUserFromStorage, selectIsHydrated, setCredentials, setHydrated, selectIsLoggedOut } from "../../features/auth/authSlice";
 
 export function AuthGate({ children }) {
   const dispatch = useDispatch();
   const hydrated = useSelector(selectIsHydrated);
+  const isLoggedOut = useSelector(selectIsLoggedOut);
 
   // Hydrate Redux from localStorage (instant UI)
   useEffect(() => {
@@ -16,7 +17,7 @@ export function AuthGate({ children }) {
 
   // Silent /auth/me in background AFTER hydration
   const { data, isError } = useGetMeQuery(undefined, {
-    skip: !hydrated, // don't fire until we've hydrated
+    skip: !hydrated || isLoggedOut, // don't fire until we've hydrated, AND skip if strictly logged out
   });
 
   useEffect(() => {

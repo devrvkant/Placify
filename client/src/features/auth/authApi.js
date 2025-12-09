@@ -22,6 +22,14 @@ export const authApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+
+          // 1. Manually seed the 'getMe' cache entry -> Component finds data instantly -> No network fetch
+          // We use upsertQueryData to force the creation of the cache entry if it doesn't exist (which it won't after logout)
+          dispatch(
+            authApi.util.upsertQueryData("getMe", undefined, { user: data.user })
+          );
+
+          // 2. update auth state (which wakes up AuthGate)
           const user = data.user;
           dispatch(setCredentials(user));
         } catch (err) {
