@@ -1,44 +1,43 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import config from "../../config/env";
+import { useVerifyEmailQuery } from "../../features/auth/authApi";
 
 export default function VerifyEmail() {
-  const [status, setStatus] = useState("loading");
-  // loading | success | error
-
-  const [message, setMessage] = useState("");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
   const token = searchParams.get("token");
 
+  // Skip query if no token
+  const { data, isLoading, isSuccess, isError, error } = useVerifyEmailQuery(token, {
+    skip: !token,
+  });
+
   useEffect(() => {
-    const verifyEmail = async () => {
-      try {
-        const res = await axios.get(
-          `${config.devServerUrl}/api/auth/verify-email?token=${token}`
-        );
+    if (isSuccess) {
+      // Redirect after 3s
+      const timer = setTimeout(() => {
+        navigate("/auth/login");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, navigate]);
 
-        setStatus("success");
-        setMessage(res.data.message || "Email verified successfully!");
-        console.log(res.data.message || "Email verified successfully!");
+  let status = "loading";
+  let message = "Verifying Email...";
 
-        // Redirect after 3s
-        setTimeout(() => {
-          navigate("/auth/login");
-        }, 3000);
-      } catch (err) {
-        setStatus("error");
-        setMessage(
-          err.response?.data?.message ||
-            "Invalid or expired token. Please try again."
-        );
-      }
-    };
-
-    verifyEmail();
-  }, [token, navigate]);
+  if (!token) {
+    status = "error";
+    message = "Verification token missing!";
+  } else if (isLoading) {
+    status = "loading";
+    message = "Verifying Email...";
+  } else if (isSuccess) {
+    status = "success";
+    message = data?.message || "Email verified successfully!";
+  } else if (isError) {
+    status = "error";
+    message = error?.data?.message || "Invalid or expired token. Please try again.";
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">

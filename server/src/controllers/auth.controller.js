@@ -210,6 +210,11 @@ export const getCurrentUser = async (req, res) => {
       return res.status(401).json({ message: "Not Authenticated!" });
     }
 
+    // Prevent caching of this response to ensure reliable auth checks on back/forward navigation
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
     const userObj = req.user.toObject();
     delete userObj.passwordHash;
 

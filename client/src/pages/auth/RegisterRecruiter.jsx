@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Briefcase, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,15 +13,43 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRegisterRecruiterMutation } from "../../features/auth/authApi";
+import { toast } from "sonner";
 
 const RegisterRecruiter = () => {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [fullName, setFullName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  const [registerRecruiter, { isLoading, isError, error, isSuccess }] = useRegisterRecruiterMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Registration successful! Please check your email to verify your account.");
+      navigate("/auth/login");
+    }
+  }, [isSuccess, navigate]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(error?.data?.message || "Registration failed. Please try again.");
+    }
+  }, [isError, error]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => setIsLoading(false), 2000);
+    if (!fullName || !email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      await registerRecruiter({ fullName, email, password }).unwrap();
+    } catch (err) {
+      // Error handled in useEffect
+      console.error("Registration error:", err);
+    }
   };
 
   return (
@@ -91,6 +119,8 @@ const RegisterRecruiter = () => {
                   placeholder="Jane Smith"
                   required
                   className="h-11 bg-background/50"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -101,6 +131,8 @@ const RegisterRecruiter = () => {
                   placeholder="jane@company.com"
                   required
                   className="h-11 bg-background/50"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -111,6 +143,8 @@ const RegisterRecruiter = () => {
                   placeholder="Create a strong password"
                   required
                   className="h-11 bg-background/50"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
 

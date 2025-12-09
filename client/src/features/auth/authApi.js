@@ -5,7 +5,7 @@ import config from "../../config/env";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: config.viteEnv === "production" ? `${config.prodServerUrl}/api/auth`  : `${config.devServerUrl}/api/auth`,
+    baseUrl: config.viteEnv === "production" ? `${config.prodServerUrl}/api/auth` : `${config.devServerUrl}/api/auth`,
     credentials: "include", // include cookies for httpOnly token
   }),
   tagTypes: ["User"],
@@ -75,7 +75,6 @@ export const authApi = createApi({
             })
           );
         } catch (err) {
-          console.log(err.message);
           // If getMe fails (e.g., 401), we should probably ensure state is clear
           dispatch(logOut());
         }

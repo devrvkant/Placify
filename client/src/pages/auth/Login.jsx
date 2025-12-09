@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, LogIn, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,15 +13,55 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLoginMutation } from "../../features/auth/authApi";
+import { toast } from "sonner";
 
 const Login = () => {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+
+  const [login, { data, isLoading, isError, error, isSuccess }] = useLoginMutation();
+
+  useEffect(() => {
+    if (isSuccess && data) {
+      toast.success("Login successful!");
+
+      // If 'from' is generic (landing or login), redirect based on role
+      if (from === "/" || from === "/auth/login") {
+        const role = data.user?.role;
+        if (role === "student") navigate("/student", { replace: true });
+        else if (role === "recruiter") navigate("/recruiter", { replace: true });
+        else if (role === "admin") navigate("/admin", { replace: true });
+        else navigate("/", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
+    }
+  }, [isSuccess, data, navigate, from]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(error?.data?.message || "Login failed. Please check your credentials.");
+    }
+  }, [isError, error]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => setIsLoading(false), 2000);
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      await login({ email, password }).unwrap();
+    } catch (err) {
+      // Error handled in useEffect
+      console.error("Login error:", err);
+    }
   };
 
   return (
@@ -94,6 +134,8 @@ const Login = () => {
                   placeholder="m@example.com"
                   required
                   className="h-11 bg-background/50"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -111,6 +153,8 @@ const Login = () => {
                   type="password"
                   required
                   className="h-11 bg-background/50"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
 

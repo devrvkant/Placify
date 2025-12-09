@@ -1,12 +1,38 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Menu, X } from 'lucide-react';
+import { Briefcase, Menu, X, LogOut, User } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated, selectCurrentUser } from '../../features/auth/authSlice';
+import { useLogoutMutation } from '../../features/auth/authApi';
+import { toast } from 'sonner';
 
 const Header = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
+    const isAuthenticated = useSelector(selectIsAuthenticated);
+    const user = useSelector(selectCurrentUser);
+    const navigate = useNavigate();
+    const [logout] = useLogoutMutation();
+
+    const handleLogout = async () => {
+        try {
+            await logout().unwrap();
+            toast.success("Logged out successfully");
+            navigate("/");
+        } catch (err) {
+            console.error("Logout failed", err);
+        }
+    };
+
+    const getDashboardLink = () => {
+        if (user?.role === 'student') return '/student';
+        if (user?.role === 'recruiter') return '/recruiter';
+        if (user?.role === 'admin') return '/admin';
+        return '/';
+    };
 
     return (
         <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md">
@@ -30,12 +56,29 @@ const Header = () => {
 
                 {/* Right: CTAs */}
                 <div className="hidden md:flex items-center gap-4">
-                    <Button variant="ghost" asChild>
-                        <Link to="/auth/login">Login</Link>
-                    </Button>
-                    <Button asChild>
-                        <Link to="/auth/register">Get Started</Link>
-                    </Button>
+                    {isAuthenticated ? (
+                        <>
+                            <Button variant="ghost" asChild>
+                                <Link to={getDashboardLink()}>
+                                    <User className="mr-2 h-4 w-4" />
+                                    Dashboard
+                                </Link>
+                            </Button>
+                            <Button variant="outline" onClick={handleLogout}>
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Logout
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button variant="ghost" asChild>
+                                <Link to="/auth/login">Login</Link>
+                            </Button>
+                            <Button asChild>
+                                <Link to="/auth/register">Get Started</Link>
+                            </Button>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile Menu Toggle */}
@@ -64,12 +107,25 @@ const Header = () => {
                             <a href="#recruiters" className="text-sm font-medium text-muted-foreground hover:text-foreground" onClick={toggleMobileMenu}>For Recruiters</a>
                             <a href="#admins" className="text-sm font-medium text-muted-foreground hover:text-foreground" onClick={toggleMobileMenu}>For Admins</a>
                             <div className="pt-4 flex flex-col gap-2">
-                                <Button variant="outline" className="w-full" asChild>
-                                    <Link to="/auth/login">Login</Link>
-                                </Button>
-                                <Button className="w-full" asChild>
-                                    <Link to="/auth/register">Get Started</Link>
-                                </Button>
+                                {isAuthenticated ? (
+                                    <>
+                                        <Button variant="outline" className="w-full" asChild>
+                                            <Link to={getDashboardLink()}>Dashboard</Link>
+                                        </Button>
+                                        <Button className="w-full" onClick={handleLogout}>
+                                            Logout
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Button variant="outline" className="w-full" asChild>
+                                            <Link to="/auth/login">Login</Link>
+                                        </Button>
+                                        <Button className="w-full" asChild>
+                                            <Link to="/auth/register">Get Started</Link>
+                                        </Button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </motion.div>
